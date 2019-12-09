@@ -1,0 +1,91 @@
+listen_addresses = '*'             
+port = 5432                        
+max_connections = 200              
+superuser_reserved_connections = 5 
+dynamic_shared_memory_type = posix 
+vacuum_cost_delay = 100            
+vacuum_cost_limit = 200            
+bgwriter_delay = 200ms             
+bgwriter_lru_maxpages = 100        
+effective_io_concurrency = 1       
+max_wal_size = 1GB
+min_wal_size = 80MB
+archive_mode = on  
+archive_command = '/var/opt/pgsql/admin/scripts/archive/multi_dest_archive_log_ship.sh "%p" "%f"'
+random_page_cost = 2.5                
+log_destination = 'stderr'            
+logging_collector = on                
+log_directory = '/var/opt/pgsql/serverlog/'
+log_filename = 'postgresql.log'    
+log_truncate_on_rotation = on      
+log_rotation_age = 1d              
+log_rotation_size = 0              
+log_min_messages = log             
+log_min_error_statement = log      
+log_min_duration_statement = 5000  
+log_checkpoints = on
+log_hostname = on
+log_line_prefix = '< %m  %u %d  %h  >'
+log_statement = 'ddl'                   # none, ddl, mod, all
+track_activities = on
+track_counts = on
+track_io_timing = on
+track_functions = all                   
+track_activity_query_size = 32768       
+autovacuum_max_workers = 5              
+autovacuum_vacuum_cost_delay = 50ms     
+autovacuum_vacuum_cost_limit = 100      
+client_min_messages = warning           
+datestyle = 'iso, mdy'
+lc_messages = 'en_US.UTF-8'             
+lc_monetary = 'en_US.UTF-8'             
+lc_numeric = 'en_US.UTF-8'              
+lc_time = 'en_US.UTF-8'                 
+default_text_search_config = 'pg_catalog.english'       # spls
+shared_preload_libraries = 'pg_hint_plan'        # (change requires restart)
+include_dir = 'pgconf.spls.include'    
+
+
+
+$ cd pgconf.spls.include
+$ ls -rtl
+total 8
+-rw-r--r-- 1 postgres postgres 1258 Nov  8 17:34 timezone_locale.conf
+-rw-r--r-- 1 postgres postgres 1060 Dec  5 20:32 memory_16G.conf
+$ cat memory_16G.conf timezone_locale.conf
+#------------------------------------------------------------------------------
+# SPLS  RESOURCE USAGE (except WAL)
+#------------------------------------------------------------------------------
+# - Memory -
+shared_buffers          = 3840MB                                # pgtune mixed 16G recommendation (change requires restart)
+work_mem                = 720MB                                  # pgtune mixed 16G recommendation
+maintenance_work_mem    = 512MB                                 # EDB Rupinder Singh tune best practice recommendation
+
+temp_file_limit         = 1GB                                   # EDB Rupinder Singh tune best practice recommendation - limits per-session temp file space
+
+#------------------------------------------------------------------------------
+# SPLS QUERY TUNING
+#------------------------------------------------------------------------------
+# - Planner Cost Constants -
+effective_cache_size    = 11GB                                  # EDB PEM Postgres Expert 16G tune recommendation to make index scans happen
+
+#------------------------------------------------------------------------------
+# SPLS  ERROR REPORTING AND LOGGING
+#------------------------------------------------------------------------------
+# This is used when logging to stderr:
+
+log_timezone            = 'US/Eastern'                          # NOTE:  This is cluster installation location specific
+
+#------------------------------------------------------------------------------
+# SPLS  CLIENT CONNECTION
+#------------------------------------------------------------------------------
+# - Locale and Formatting -
+# These settings are initialized by initdb, but they can be changed.
+
+default_text_search_config = 'pg_catalog.english'               # default configuration for text search
+timezone                = 'US/Eastern'                          # NOTE:  This is cluster installation location specific
+
+lc_messages             = 'en_US.UTF-8'                         # locale for system error message strings
+lc_monetary             = 'en_US.UTF-8'                         # locale for monetary formatting
+lc_numeric              = 'en_US.UTF-8'                         # locale for number formatting
+lc_time                 = 'en_US.UTF-8'                         # locale for time formatting

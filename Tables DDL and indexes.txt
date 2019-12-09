@@ -1,0 +1,53 @@
+CREATE TABLE pdt_to_pdtalt_rel (
+        glbl_pdt_dbky integer NOT NULL,
+        orgnl_pdt_dbky bigint,
+        alt_pdt_dbky bigint,
+        val_prop_dbky bigint,
+        crtd_by varchar(20) NOT NULL,
+        crtd_tms timestamp NOT NULL,
+        mdfd_by varchar(20) NOT NULL,
+        mdfd_tms timestamp NOT NULL,
+        alt_factor decimal(22,3),
+        version bigint
+) ;
+CREATE INDEX ix_alt_pdt_dbky ON pdt_to_pdtalt_rel (alt_pdt_dbky);
+CREATE INDEX ix_orgnl_pdt_dbky ON pdt_to_pdtalt_rel (orgnl_pdt_dbky);
+ALTER TABLE pdt_to_pdtalt_rel ADD PRIMARY KEY (glbl_pdt_dbky);
+
+
+
+CREATE TABLE pdtalt_rel_to_tenant_rel (
+        dbky integer NOT NULL,
+        glbl_pdt_dbky integer NOT NULL,
+        tenant_dkby integer NOT NULL,
+        crtd_by varchar(20) NOT NULL,
+        crtd_tms timestamp NOT NULL,
+        mdfd_by varchar(20) NOT NULL,
+        mdfd_tms timestamp NOT NULL,
+        status_typ_dbky bigint,
+        inactive_reason varchar(2000),
+        eff_strt_tms timestamp,
+        eff_end_tms timestamp,
+        version bigint,
+        rule_status_typ_dbky bigint,
+        rule_fail_reason varchar(2000),
+        notification_flag varchar(1),
+        rule_mdfd_by varchar(20),
+        rule_mdfd_tms timestamp
+) ;
+CREATE INDEX ix_eff_end_tms ON pdtalt_rel_to_tenant_rel (eff_end_tms desc);
+CREATE INDEX ix_glbl_pdt_dbky ON pdtalt_rel_to_tenant_rel (glbl_pdt_dbky);
+ALTER TABLE pdtalt_rel_to_tenant_rel ADD PRIMARY KEY (dbky);
+
+ALTER TABLE pdtalt_rel_to_tenant_rel ADD CONSTRAINT fk_pdt_to_pdtalt_rel FOREIGN KEY (glbl_pdt_dbky) REFERENCES pdt_to_pdtalt_rel(glbl_pdt_dbky) ON DELETE NO ACTION NOT DEFERRABLE INITIALLY IMMEDIATE;
+
+
+-- May be not of use
+
+ALTER TABLE pdt_to_pdtalt_rel ADD CONSTRAINT fk_alt_pdt_dbky FOREIGN KEY (alt_pdt_dbky) REFERENCES product(pdt_dbky) ON DELETE NO ACTION NOT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE pdt_to_pdtalt_rel ADD CONSTRAINT fk_orgnl_pdt_dbky FOREIGN KEY (orgnl_pdt_dbky) REFERENCES product(pdt_dbky) ON DELETE NO ACTION NOT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE pdt_to_pdtalt_rel ADD CONSTRAINT fk_vp_dbky FOREIGN KEY (val_prop_dbky) REFERENCES val_prop(vp_dbky) ON DELETE NO ACTION NOT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE pdtalt_rel_to_tenant_rel ADD CONSTRAINT fk_rule_status_typ_dbky FOREIGN KEY (rule_status_typ_dbky) REFERENCES typ_lkp(typ_dbky) ON DELETE NO ACTION NOT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE pdtalt_rel_to_tenant_rel ADD CONSTRAINT fk_status_typ_dbky FOREIGN KEY (status_typ_dbky) REFERENCES typ_lkp(typ_dbky) ON DELETE NO ACTION NOT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE pdtalt_rel_to_tenant_rel ADD CONSTRAINT fk_tenant_dbky_pdtalt_rel_to_tenant_rel FOREIGN KEY (tenant_dkby) REFERENCES typ_lkp(typ_dbky) ON DELETE NO ACTION NOT DEFERRABLE INITIALLY IMMEDIATE;
+

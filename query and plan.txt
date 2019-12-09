@@ -1,0 +1,109 @@
+select
+        pdtaltrelt0_.dbky as dbky1_4_,
+        pdtaltrelt0_.crtd_by as crtd_by2_4_,
+        pdtaltrelt0_.crtd_tms as crtd_tms3_4_,
+        pdtaltrelt0_.mdfd_by as mdfd_by4_4_,
+        pdtaltrelt0_.mdfd_tms as mdfd_tms5_4_,
+        pdtaltrelt0_.eff_strt_tms as eff_strt6_4_,
+        pdtaltrelt0_.eff_end_tms as eff_end_7_4_,
+        pdtaltrelt0_.glbl_pdt_dbky as glbl_pd14_4_,
+        pdtaltrelt0_.inactive_reason as inactive8_4_,
+        pdtaltrelt0_.notification_flag as notifica9_4_,
+        pdtaltrelt0_.rule_fail_reason as rule_fa10_4_,
+        pdtaltrelt0_.rule_mdfd_by as rule_md11_4_,
+        pdtaltrelt0_.rule_mdfd_tms as rule_md12_4_,
+        pdtaltrelt0_.rule_status_typ_dbky as rule_st15_4_,
+        pdtaltrelt0_.status_typ_dbky as status_16_4_,
+        pdtaltrelt0_.tenant_dkby as tenant_17_4_,
+        pdtaltrelt0_.version as version13_4_,
+	pdtaltrelt0_.tenant_dkby
+    from
+        pdtalt_rel_to_tenant_rel pdtaltrelt0_ cross 
+    join
+        pdt_to_pdtalt_rel productalt1_ 
+    where
+        pdtaltrelt0_.glbl_pdt_dbky=productalt1_.glbl_pdt_dbky 
+        and (
+            pdtaltrelt0_.status_typ_dbky=102 
+            and (
+                pdtaltrelt0_.rule_status_typ_dbky is null
+            ) 
+            or pdtaltrelt0_.status_typ_dbky in (
+                19
+            ) 
+            or pdtaltrelt0_.status_typ_dbky in (
+                20
+            )
+        ) 
+        and (
+            pdtaltrelt0_.status_typ_dbky in (
+                19 , 20
+            ) 
+            or pdtaltrelt0_.status_typ_dbky=102 
+            and (
+                pdtaltrelt0_.rule_status_typ_dbky is null
+            )
+        ) 
+        and productalt1_.val_prop_dbky<>9 
+        and (
+            productalt1_.orgnl_pdt_dbky in (
+                select
+                    productalt4_.orgnl_pdt_dbky 
+                from
+                    pdtalt_rel_to_tenant_rel pdtaltrelt3_ cross 
+                join
+                    pdt_to_pdtalt_rel productalt4_ 
+                where
+                    pdtaltrelt3_.glbl_pdt_dbky=productalt4_.glbl_pdt_dbky 
+                    and productalt4_.val_prop_dbky=9 
+                    and pdtaltrelt3_.status_typ_dbky=19 
+                    and pdtaltrelt3_.tenant_dkby=pdtaltrelt0_.tenant_dkby
+            ) 
+            or productalt1_.alt_pdt_dbky in (
+                select
+                    productalt8_.orgnl_pdt_dbky 
+                from
+                    pdtalt_rel_to_tenant_rel pdtaltrelt7_ cross 
+                join
+                    pdt_to_pdtalt_rel productalt8_ 
+                where
+                    pdtaltrelt7_.glbl_pdt_dbky=productalt8_.glbl_pdt_dbky 
+                    and productalt8_.val_prop_dbky=9 
+                    and pdtaltrelt7_.status_typ_dbky=19 
+                   and pdtaltrelt7_.tenant_dkby=pdtaltrelt0_.tenant_dkby
+            )
+        ) 
+;
+
+
+
+                                                                                                                        QUERY PLAN
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Hash Join  (cost=10578.85..44602.70 rows=180107 width=557)
+   Hash Cond: (pdtaltrelt0_.glbl_pdt_dbky = productalt1_.glbl_pdt_dbky)
+   Join Filter: ((SubPlan 1) OR (SubPlan 2))
+   ->  Seq Scan on pdtalt_rel_to_tenant_rel pdtaltrelt0_  (cost=0.00..10082.36 rows=249584 width=555)
+         Filter: (((status_typ_dbky = ANY ('{19,20}'::bigint[])) OR ((status_typ_dbky = 102) AND (rule_status_typ_dbky IS NULL))) AND (((status_typ_dbky = 102) AND (rule_status_typ_dbky IS NULL)) OR (status_typ_dbky = 19) OR (status_typ_
+dbky = 20)))
+   ->  Hash  (cost=7365.10..7365.10 rows=257100 width=20)
+         ->  Seq Scan on pdt_to_pdtalt_rel productalt1_  (cost=0.00..7365.10 rows=257100 width=20)
+               Filter: (val_prop_dbky <> 9)
+   SubPlan 1
+     ->  Hash Join  (cost=7491.45..15787.03 rows=3132 width=8)
+           Hash Cond: (pdtaltrelt3_.glbl_pdt_dbky = productalt4_.glbl_pdt_dbky)
+           ->  Seq Scan on pdtalt_rel_to_tenant_rel pdtaltrelt3_  (cost=0.00..8078.24 rows=82797 width=4)
+                 Filter: ((status_typ_dbky = 19) AND (tenant_dkby = pdtaltrelt0_.tenant_dkby))
+           ->  Hash  (cost=7365.10..7365.10 rows=10108 width=12)
+                 ->  Seq Scan on pdt_to_pdtalt_rel productalt4_  (cost=0.00..7365.10 rows=10108 width=12)
+                       Filter: (val_prop_dbky = 9)
+   SubPlan 2
+     ->  Hash Join  (cost=7491.45..15787.03 rows=3132 width=8)
+           Hash Cond: (pdtaltrelt7_.glbl_pdt_dbky = productalt8_.glbl_pdt_dbky)
+           ->  Seq Scan on pdtalt_rel_to_tenant_rel pdtaltrelt7_  (cost=0.00..8078.24 rows=82797 width=4)
+                 Filter: ((status_typ_dbky = 19) AND (tenant_dkby = pdtaltrelt0_.tenant_dkby))
+           ->  Hash  (cost=7365.10..7365.10 rows=10108 width=12)
+                 ->  Seq Scan on pdt_to_pdtalt_rel productalt8_  (cost=0.00..7365.10 rows=10108 width=12)
+                       Filter: (val_prop_dbky = 9)
+(24 rows)
+
